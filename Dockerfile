@@ -25,6 +25,7 @@ ADD redig.hh /konbu
 ADD puts.cc /konbu
 ADD corpus.hh /konbu
 ADD lword.hh /konbu
+ADD file2eigen.hh /konbu
 ADD sparse.hh /konbu
 ADD init.sh /konbu
 ADD index.php /var/www/htdocs
