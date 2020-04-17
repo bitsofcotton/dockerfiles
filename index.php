@@ -39,7 +39,7 @@ if(isset($_REQUEST["cmd"])) {
     $convert = "convert ";
     $resize  = " -resize 300x300\> ";
     if($_REQUEST["mode"] == "m" || $_REQUEST["mode"] == "o") {
-      echo "<pre>";
+      echo "<textarea id='objfile'>";
       switch($_REQUEST["mode"]) {
       case "m":
         echo "newmtl material0\n";
@@ -62,7 +62,9 @@ if(isset($_REQUEST["cmd"])) {
       default:
         echo "Not implemented: " . $_REQUEST["mode"];
       }
-      echo "</pre>";
+      echo "</textarea><br/>";
+      echo "<a href='#' onClick='javascript: document.getElementById(\"downobj\").href = window.URL.createObjectURL(new Blob([document.getElementById(\"objfile\").value, {type: \"text/plain\"}]));'>Make blob</a><br/>";
+      echo "<a id='downobj'>Download</a>";
     } else {
       echo "<img src='data:image/png;base64,";
       $img  = file_get_contents($_FILES['containt']['tmp_name']);
@@ -73,6 +75,20 @@ if(isset($_REQUEST["cmd"])) {
       switch($_REQUEST["mode"]) {
       case "c":
         doexecp('./goki collect ' . $temp . ' ' . $tout, '\n', $cwd, $env, false);
+        break;
+      case "B":
+        $tout0 = tempnam(dirname($_FILES['containt']['tmp_name']), 'ppm');
+        $tout1 = tempnam(dirname($_FILES['containt']['tmp_name']), 'ppm');
+        $tout2 = tempnam(dirname($_FILES['containt']['tmp_name']), 'ppm');
+        doexecp('./goki bump .05 ' . $temp . ' ' . $tout0, '\n', $cwd, $env, false);
+        doexecp('./goki reshape 4 ' . $tout0 . ' ' . $temp . ' ' . $tout1, '\n', $cwd, $env, false);
+        doexecp($convert . $tout1 . ' -negate ' . $tout0, '\n', $cwd, $env, false);
+        doexecp('./goki collect ' . $temp . ' ' . $tout2, '\n', $cwd, $env, false);
+        doexecp($convert . $tout2 . ' -negate ' . $tout1, '\n', $cwd, $env, false);
+        doexecp($convert . $tout1 . ' ' . $tout0 . ' -compose hard-light -composite ' . $tout, '\n', $cwd, $env, false);
+        unlink($tout0);
+        unlink($tout1);
+        unlink($tout2);
         break;
       case "b":
         $tout0 = tempnam(dirname($_FILES['containt']['tmp_name']), 'ppm');
@@ -293,6 +309,7 @@ function asyncPost(cmd, sel, cont, outcont, fin) {
   return;
 }
 </script>
+<link rel="stylesheet" type="text/css" href="./style.css" >
 </HEAD>
 <BODY>
 Hello, this is konbu.azurewebsites.net the working sample page of the software located in <a href="https://github.com/bitsofcotton">github.com/bitsofcotton</a> . <br/><br/>
@@ -301,6 +318,7 @@ Hello, this is konbu.azurewebsites.net the working sample page of the software l
   <select id="mode">
     <option value="c">collect</option>
     <option value="b">bump</option>
+    <option value="B">bumpfigure</option>
     <option value="p">extend</option>
     <option value="l">light</option>
     <option value="o">obj</option>

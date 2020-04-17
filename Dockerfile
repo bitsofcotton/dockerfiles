@@ -16,7 +16,6 @@ ADD p0.hh /konbu
 ADD p1.cc /konbu
 ADD p1.hh /konbu
 ADD goki.cc /konbu
-ADD p0-goki.hh /konbu
 ADD enlarge.hh /konbu
 ADD fileio.hh /konbu
 ADD ifloat.hh /konbu
