@@ -54,6 +54,5 @@ RUN mkdir -p /var/run/fcgiwrap
 RUN chown www-data:www-data /var/run/fcgiwrap `which fcgiwrap`
 RUN chmod ug+s `which fcgiwrap`
 EXPOSE 80
-EXPOSE 443
 ENTRYPOINT ["./init.sh"]
 

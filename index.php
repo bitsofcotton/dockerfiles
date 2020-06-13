@@ -53,7 +53,7 @@ if(isset($_REQUEST["cmd"])) {
         $temp = $_FILES['containt']['tmp_name'] . "-work.ppm";
         $tout = tempnam(dirname($_FILES['containt']['tmp_name']), 'obj');
         doexecp($convert . $_FILES['containt']['tmp_name'] . $resize . ' -compress none ' . $temp, '\n', $cwd, $env, false);
-        doexecp('./goki obj 2 1 .001 0 ' . $temp . ' ' . $tout, '\n', $cwd, $env, false);
+        doexecp('./goki obj 2 1 .25 0 ' . $temp . ' ' . $tout, '\n', $cwd, $env, false);
         echo file_get_contents($tout);
         unlink($temp);
         unlink($tout);
@@ -76,25 +76,8 @@ if(isset($_REQUEST["cmd"])) {
       case "c":
         doexecp('./goki collect ' . $temp . ' ' . $tout, '\n', $cwd, $env, false);
         break;
-      case "B":
-        $tout0 = tempnam(dirname($_FILES['containt']['tmp_name']), 'ppm');
-        $tout1 = tempnam(dirname($_FILES['containt']['tmp_name']), 'ppm');
-        $tout2 = tempnam(dirname($_FILES['containt']['tmp_name']), 'ppm');
-        doexecp('./goki bump .05 ' . $temp . ' ' . $tout0, '\n', $cwd, $env, false);
-        doexecp('./goki reshape 4 ' . $tout0 . ' ' . $temp . ' ' . $tout1, '\n', $cwd, $env, false);
-        doexecp($convert . $tout1 . ' -negate ' . $tout0, '\n', $cwd, $env, false);
-        doexecp('./goki collect ' . $temp . ' ' . $tout2, '\n', $cwd, $env, false);
-        doexecp($convert . $tout2 . ' -negate ' . $tout1, '\n', $cwd, $env, false);
-        doexecp($convert . $tout1 . ' ' . $tout0 . ' -compose hard-light -composite ' . $tout, '\n', $cwd, $env, false);
-        unlink($tout0);
-        unlink($tout1);
-        unlink($tout2);
-        break;
       case "b":
-        $tout0 = tempnam(dirname($_FILES['containt']['tmp_name']), 'ppm');
-        doexecp('./goki bump .05 ' . $temp . ' ' . $tout0, '\n', $cwd, $env, false);
-        doexecp('./goki reshape 20 ' . $tout0 . ' ' . $temp . ' ' . $tout, '\n', $cwd, $env, false);
-        unlink($tout0);
+        doexecp('./goki bump 2 ' . $temp . ' ' . $tout, '\n', $cwd, $env, false);
         break;
       case "p":
         doexecp('./goki pextend 4 ' . $temp . ' ' . $tout, '\n', $cwd, $env, false);
@@ -318,7 +301,6 @@ Hello, this is konbu.azurewebsites.net the working sample page of the software l
   <select id="mode">
     <option value="c">collect</option>
     <option value="b">bump</option>
-    <option value="B">bumpfigure</option>
     <option value="p">extend</option>
     <option value="l">light</option>
     <option value="o">obj</option>
