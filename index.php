@@ -74,16 +74,16 @@ if(isset($_REQUEST["cmd"])) {
       doexecp($convert . $_FILES['containt']['tmp_name'] . $resize . ' -compress none ' . $temp, '\n', $cwd, $env, false);
       switch($_REQUEST["mode"]) {
       case "c":
-        doexecp('./goki collect ' . $temp . ' ' . $tout, ' 1 1\n', $cwd, $env, false);
+        doexecp('./goki collect ' . $temp . ' ' . $tout . ' 1 1', '\n', $cwd, $env, false);
         break;
       case "b":
-        doexecp('./goki bump ' . $temp . ' ' . $tout, ' 1 1\n', $cwd, $env, false);
+        doexecp('./goki bump ' . $temp . ' ' . $tout . ' 1 1', '\n', $cwd, $env, false);
         break;
       case "p":
-        doexecp('./goki pextend ' . $temp . ' ' . $tout, ' 1 1\n', $cwd, $env, false);
+        doexecp('./goki pextend ' . $temp . ' ' . $tout . ' 1 1', '\n', $cwd, $env, false);
         break;
       case "l":
-        doexecp('./goki light ' . $temp . ' ' . $tout, ' 1 1\n', $cwd, $env, false);
+        doexecp('./goki light ' . $temp . ' ' . $tout . ' 1 1', '\n', $cwd, $env, false);
         break;
       default:
         echo "Not implemented: " . $_REQUEST["mode"] . "' />";
