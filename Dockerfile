@@ -37,7 +37,7 @@ WORKDIR /konbu
 RUN cc -O3 -lm -lstdc++ -o konbu konbu.cc
 RUN cc -O3 -lm -lstdc++ -o p0 p0.cc
 RUN cc -O3 -lm -lstdc++ -o p1 p1.cc
-RUN cc -O3 -lm -lstdc++ -D_WITHOUT_EIGEN_ -o goki goki.cc
+RUN cc -O3 -lm -lstdc++ -o goki goki.cc
 RUN cc -O3 -lm -lstdc++ -o puts puts.cc
 RUN cp konbu /var/www/htdocs
 RUN cp p0 /var/www/htdocs
