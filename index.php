@@ -1,11 +1,11 @@
 <?php
 
-function doexecp($cmd, $text, $cwd, $env, $viewout) {
+function doexecp($cmd, $text, $viewout) {
   $descriptorspec = array(
-    0 => array("pipe", "r"),  // stdin.
-    1 => array("pipe", "w"),  // stdout.
+    0 => array("pipe", "r"),
+    1 => array("pipe", "w"),
     2 => array("pipe", "w") );
-  $process = proc_open($cmd, $descriptorspec, $pipes, $cwd, $env);
+  $process = proc_open($cmd, $descriptorspec, $pipes);
   if (is_resource($process)) {
     fwrite($pipes[0], $text . "\n");
     fclose($pipes[0]);
@@ -25,13 +25,13 @@ if(isset($_REQUEST["cmd"])) {
   case "p":
     $text = $_REQUEST['containt'];
     echo "<pre>";
-    doexecp("./p0", $text, $cwd, $env, true);
-    doexecp("./p1", $text, $cwd, $env, true);
+    doexecp("./p0", $text, true);
+    doexecp("./p1", $text, true);
     echo "</pre>";
     break;
   case "k":
     echo "<pre>";
-    doexecp("./konbu", "\n", $cwd, $env, true);
+    doexecp("./konbu", "\n", true);
     echo "</pre>";
     break;
   case "g":
@@ -52,8 +52,8 @@ if(isset($_REQUEST["cmd"])) {
       case "o":
         $temp = $_FILES['containt']['tmp_name'] . "-work.ppm";
         $tout = tempnam(dirname($_FILES['containt']['tmp_name']), 'obj');
-        doexecp($convert . $_FILES['containt']['tmp_name'] . $resize . ' -compress none ' . $temp, '\n', $cwd, $env, false);
-        doexecp('./goki obj 2 1 .25 0 ' . $temp . ' ' . $tout, '\n', $cwd, $env, false);
+        doexecp($convert . $_FILES['containt']['tmp_name'] . $resize . ' -compress none ' . $temp, '\n', false);
+        doexecp('./goki obj 2 1 .25 0 ' . $temp . ' ' . $tout, '\n', false);
         echo file_get_contents($tout);
         unlink($temp);
         unlink($tout);
@@ -71,19 +71,19 @@ if(isset($_REQUEST["cmd"])) {
       $temp = $_FILES['containt']['tmp_name'] . "-work.ppm";
       $tout = tempnam(dirname($_FILES['containt']['tmp_name']), 'obj');
       $tpng = $_FILES['containt']['tmp_name'] . "-work.png";
-      doexecp($convert . $_FILES['containt']['tmp_name'] . $resize . ' -compress none ' . $temp, '\n', $cwd, $env, false);
+      doexecp($convert . $_FILES['containt']['tmp_name'] . $resize . ' -compress none ' . $temp, '\n', false);
       switch($_REQUEST["mode"]) {
       case "c":
-        doexecp('./goki collect ' . $temp . ' ' . $tout . ' 1 1', '\n', $cwd, $env, false);
+        doexecp('./goki collect ' . $temp . ' ' . $tout . ' 1 1', '\n', false);
         break;
       case "b":
-        doexecp('./goki bump ' . $temp . ' ' . $tout . ' 1 1', '\n', $cwd, $env, false);
+        doexecp('./goki bump ' . $temp . ' ' . $tout . ' 1 1', '\n', false);
         break;
       case "p":
-        doexecp('./goki pextend ' . $temp . ' ' . $tout . ' 1 1', '\n', $cwd, $env, false);
+        doexecp('./goki pextend ' . $temp . ' ' . $tout . ' 1 1', '\n', false);
         break;
       case "l":
-        doexecp('./goki light ' . $temp . ' ' . $tout . ' 1 1', '\n', $cwd, $env, false);
+        doexecp('./goki sharpen ' . $temp . ' ' . $tout . ' 1 1', '\n', false);
         break;
       default:
         echo "Not implemented: " . $_REQUEST["mode"] . "' />";
@@ -91,7 +91,7 @@ if(isset($_REQUEST["cmd"])) {
         exit(0);
         break;
       }
-      doexecp($convert . ' ' . $tout . ' ' . $tpng, '\n', $cwd, $env, false);
+      doexecp($convert . ' ' . $tout . ' ' . $tpng, '\n', false);
       echo base64_encode(file_get_contents($tpng));
       echo "' />";
       unlink($temp);
@@ -106,25 +106,6 @@ if(isset($_REQUEST["cmd"])) {
     $ddict0 = $_REQUEST["dict0"];
     $ddict1 = $_REQUEST["dict1"];
     $dname  = str_replace($dameji, "", $_REQUEST["dictname"]);
-    // thanks to: https://stackoverflow.com/questions/2104653/trim-text-to-340-chars.
-      $max_length = 1200;
-      if(strlen($text) > $max_length) {
-        $offset = ($max_length - 3) - strlen($text);
-        $text = substr($text, 0, strrpos($text, ' ', $offset)) . '...';
-      }
-      $max_length = 200;
-      if(strlen($dtopic) > $max_length) {
-        $offset = ($max_length - 3) - strlen($dtopic);
-        $dtopic = substr($dtopic, 0, strrpos($dtopic, ' ', $offset)) . '...';
-      }
-      if(strlen($ddict0) > $max_length) {
-        $offset = ($max_length - 3) - strlen($ddict0);
-        $ddict0 = substr($ddict0, 0, strrpos($ddict0, ' ', $offset)) . '...';
-      }
-      if(strlen($ddict1) > $max_length) {
-        $offset = ($max_length - 3) - strlen($ddict1);
-        $ddict1 = substr($ddict1, 0, strrpos($ddict1, ' ', $offset)) . '...';
-      }
     $mode = "";
     switch($_REQUEST["mode"]) {
     case "s":
@@ -154,11 +135,11 @@ if(isset($_REQUEST["cmd"])) {
     default:
       break;
     }
-    $tdir = tempnam('/tmp', 'puts');
+    $tdir = tempnam(sys_get_temp_dir(), 'puts');
     unlink($tdir);
-    mkdir($tdir);
-    mkdir($tdir . '/d0');
-    mkdir($tdir . '/d1');
+    mkdir($tdir, 0755, true);
+    mkdir($tdir . '/d0', 0755, true);
+    mkdir($tdir . '/d1', 0755, true);
     $ttopic = $tdir . '/topic';
     $tdict0 = $tdir . '/d0/' . $dname;
     $tdict1 = $tdir . '/d1/' . $dname;
@@ -170,15 +151,15 @@ if(isset($_REQUEST["cmd"])) {
     case "findroot":
       if($dname != "" && filesize($tdict0) != 0) {
         error_log($tdict0);
-        doexecp("./puts " . $mode . " words.txt " . $tdict0, $text, $cwd, $env, true);
+        doexecp("./puts " . $mode . " ./words.txt " . $tdict0, $text, true);
       } else {
-        doexecp("./puts " . $mode . " words.txt", $text, $cwd, $env, true);
+        doexecp("./puts " . $mode . " ./words.txt", $text, true);
       }
       break;
     case "lword":
     case "lbalance":
       echo "<pre>";
-      doexecp("./puts " . $mode . " words.txt", $text, $cwd, $env, true);
+      doexecp("./puts " . $mode . " ./words.txt 2>&1", $text, true);
       echo "</pre>";
       break;
     case "toc":
@@ -186,15 +167,15 @@ if(isset($_REQUEST["cmd"])) {
       if(filesize($ttopic) == 0) {
         echo "No input";
       } else if($dname != "" && filesize($tdict0) != 0) {
-        doexecp("./puts " . $mode . " words.txt " . $tdict0 . " -toc " . $ttopic, $text, $cwd, $env, true);
+        doexecp("./puts " . $mode . " ./words.txt " . $tdict0 . " -toc " . $ttopic, $text, true);
       } else {
-        doexecp("./puts " . $mode . " words.txt -toc " . $ttopic, $text, $cwd, $env, true);
+        doexecp("./puts " . $mode . " ./words.txt -toc " . $ttopic, $text, true);
       }
       break;
     case "diff";
     case "same";
       if($dname != "" && filesize($tdict0) != 0 && filesize($tdict1)) {
-        doexecp("./puts " . $mode . " words.txt -dict " . $tdict0 . " -dict2 " . $tdict1, $text, $cwd, $env, true);
+        doexecp("./puts " . $mode . " ./words.txt -dict " . $tdict0 . " -dict2 " . $tdict1, $text, true);
       } else {
         echo "Empty dict.";
       }
@@ -309,15 +290,15 @@ Hello, this is konbu.azurewebsites.net the working sample page of the software l
   <input type="button" onClick="javascript: asyncPost('g', 'mode', 'image_in', 'image_out', 0);" value="Calculate" /><br/>
   <p id="image_out"></p></li>
 <li>Text file: <br/>
-  <textarea id="puts_analyse" maxlength="1200" rows="30" cols="80"></textarea><br/>
+  <textarea id="puts_analyse" maxlength="40000" rows="30" cols="80"></textarea><br/>
   DictName:
   <textarea id="puts_dname" maxlength="20" rows="1" cols="20"></textarea><br/>
   Dict0:
-  <textarea id="puts_d0" maxlength="400" rows="12" cols="20"></textarea><br/>
+  <textarea id="puts_d0" maxlength="40000" rows="12" cols="20"></textarea><br/>
   Dict1:
-  <textarea id="puts_d1" maxlength="400" rows="12" cols="20"></textarea><br/>
+  <textarea id="puts_d1" maxlength="40000" rows="12" cols="20"></textarea><br/>
   Topic:
-  <textarea id="puts_topic" maxlength="400" rows="12" cols="20"></textarea><br/>
+  <textarea id="puts_topic" maxlength="40000" rows="12" cols="20"></textarea><br/>
   <select id="pmode">
     <option value="s">stat</option>
     <option value="r">root</option>
@@ -362,25 +343,11 @@ Hello, this is konbu.azurewebsites.net the working sample page of the software l
 <div>
 <pre>
 <?php
-system("ls -l *.php *.cgi goki puts konbu p0 p1");
+system("./ls -l *.php *.cgi goki puts konbu p0 p1");
 echo "\n";
-system("/bin/date");
+system("./date");
 echo "\n";
-echo '<br/>HTTP_ACCEPT: ' . $_SERVER['HTTP_ACCEPT'] . '<br/>';
-echo 'HTTP_ACCEPT_ENCODING: ' . $_SERVER['HTTP_ACCEPT_ENCODING'] . '<br/>';
-echo 'HTTP_ACCEPT_LANGUAGE: ' . $_SERVER['HTTP_ACCEPT_LANGUAGE'] . '<br/>';
-echo 'HTTP_CONNECTION: ' . $_SERVER['HTTP_CONNECTION'] . '<br/>';
-echo 'HTTP_HOST: ' . $_SERVER['HTTP_HOST'] . '<br/>';
-echo 'HTTP_UPGRADE_INSECURE_REQUESTS: ' . $_SERVER['HTTP_UPGRADE_INSECURE_REQUESTS'] . '<br/>';
-echo 'HTTP_USER_AGENT: ' . $_SERVER['HTTP_USER_AGENT'] . '<br/>';
-echo 'REMOTE_ADDR: ' . $_SERVER['REMOTE_ADDR'] . '<br/>';
-echo 'REMOTE_PORT: ' . $_SERVER['REMOTE_PORT'] . '<br/>';
-echo 'REQUEST_METHOD: ' . $_SERVER['REQUEST_METHOD'] . '<br/>';
-echo 'REQUEST_URI: ' . $_SERVER['REQUEST_URI'] . '<br/>';
-echo 'SERVER_ADDR: ' . $_SERVER['SERVER_ADDR'] . '<br/>';
-echo 'SERVER_PORT: ' . $_SERVER['SERVER_PORT'] . '<br/>';
-echo 'SERVER_NAME: ' . $_SERVER['SERVER_NAME'] . '<br/>';
-echo 'SERVER_PROTOCOL: ' . $_SERVER['SERVER_PROTOCOL'] . '<br/>';
+var_dump($_SERVER);
 ?>
 </pre>
 </div>

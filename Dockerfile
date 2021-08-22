@@ -1,14 +1,15 @@
-FROM php:7-fpm
-RUN apt-get update -y && \
-    apt-get install -y imagemagick && \
-    apt-get install -y python && \
-    apt-get install -y nginx && \
-    apt-get install -y fcgiwrap
+FROM php:fpm-alpine
+RUN apk update && \
+    apk add imagemagick && \
+    apk add python3 && \
+    apk add nginx && \
+    apk add fcgiwrap && \
+    apk add alpine-sdk && \
+    apk add clang
 RUN mkdir -p /var/www/htdocs
 RUN mkdir -p /konbu
-COPY ifloat.hh /konbu
+COPY lieonn.hh /konbu
 COPY konbu.cc /konbu
-COPY simplelin.hh /konbu
 COPY p0.cc /konbu
 COPY p0.hh /konbu
 COPY p1.cc /konbu
@@ -34,16 +35,16 @@ COPY nattoh.js /var/www/htdocs
 COPY words.txt /var/www/htdocs
 COPY nginx-site.conf /etc/nginx/nginx.conf
 WORKDIR /konbu
-RUN cc -O3 -lm -lstdc++ -o konbu konbu.cc
-RUN cc -O3 -lm -lstdc++ -o p0 p0.cc
-RUN cc -O3 -lm -lstdc++ -o p1 p1.cc
-RUN cc -O3 -lm -lstdc++ -o goki goki.cc
-RUN cc -O3 -lm -lstdc++ -o puts puts.cc
-RUN cp konbu /var/www/htdocs
-RUN cp p0 /var/www/htdocs
-RUN cp p1 /var/www/htdocs
-RUN cp goki /var/www/htdocs
-RUN cp puts /var/www/htdocs
+RUN cd /konbu && g++ -Ofast -o konbu konbu.cc
+RUN cd /konbu && g++ -Ofast -o p0 p0.cc
+RUN cd /konbu && g++ -Ofast -o p1 p1.cc
+RUN cd /konbu && g++ -Ofast -o goki goki.cc
+RUN cd /konbu && g++ -Ofast -o puts puts.cc
+RUN cp /konbu/konbu /var/www/htdocs
+RUN cp /konbu/p0 /var/www/htdocs
+RUN cp /konbu/p1 /var/www/htdocs
+RUN cp /konbu/goki /var/www/htdocs
+RUN cp /konbu/puts /var/www/htdocs
 RUN chown -R root:wheel /var/www/htdocs
 RUN chmod 111 /var/www/htdocs/konbu /var/www/htdocs/p0 /var/www/htdocs/p1 /var/www/htdocs/goki /var/www/htdocs/puts
 RUN chmod 555 /var/www/htdocs/log.cgi
