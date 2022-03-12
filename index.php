@@ -11,6 +11,7 @@ function doexecp($cmd, $text, $viewout) {
     fclose($pipes[0]);
     if($viewout) {
       echo stream_get_contents($pipes[1]);
+      echo stream_get_contents($pipes[2]);
     }
     fclose($pipes[1]);
     fclose($pipes[2]);
@@ -26,12 +27,38 @@ if(isset($_REQUEST["cmd"])) {
     $text = $_REQUEST['containt'];
     echo "<pre>";
     doexecp("./p0", $text, true);
+    echo "</pre>";
+    break;
+  case "P":
+    $text = $_REQUEST['containt'];
+    echo "<pre>";
     doexecp("./p1", $text, true);
+    echo "</pre>";
+    break;
+  case "c":
+    $text = explode("\n", $_REQUEST['containt']);
+    $text = array_slice($text, 0, 2000);
+    echo "<pre>";
+    doexecp("./catgr", implode("\n", $text), true);
+    echo "</pre>";
+    break;
+  case "C":
+    $text = explode("\n", $_REQUEST['containt']);
+    $text = array_slice($text, 0, 30);
+    echo "<pre>";
+    doexecp("./catg", implode("\n", $text), true);
+    echo "</pre>";
+    break;
+  case "d":
+    $text = explode("\n", $_REQUEST['containt']);
+    $text = array_slice($text, 0, 16);
+    echo "<pre>";
+    doexecp("./decompose", implode("\n", $text), true);
     echo "</pre>";
     break;
   case "k":
     echo "<pre>";
-    doexecp("./konbu", "\n", true);
+    doexecp("./konbu", $text, true);
     echo "</pre>";
     break;
   case "g":
@@ -335,15 +362,18 @@ Hello, this is konbu.azurewebsites.net the working sample page of the software l
 </li>
 <li>Numerical data (float, \n separated.) : <br/>
   <textarea id="pred_in" maxlength="80000" rows="30" cols="80"></textarea><br/>
-  <input type="button" onClick="javascript: asyncPost('p', 'mode', 'pred_in', 'pred_out', 1);" value="Calculate Result" /><br/>
+  <input type="button" onClick="javascript: asyncPost('p', 'mode', 'pred_in', 'pred_out', 1);" value="p0 Result" /><br/>
+  <input type="button" onClick="javascript: asyncPost('P', 'mode', 'pred_in', 'pred_out', 1);" value="p1 Result" /><br/>
+  <input type="button" onClick="javascript: asyncPost('c', 'mode', 'pred_in', 'pred_out', 1);" value="catgr Result" /><br/>
+  <input type="button" onClick="javascript: asyncPost('C', 'mode', 'pred_in', 'pred_out', 1);" value="catg  Result" /><br/>
+  <input type="button" onClick="javascript: asyncPost('d', 'mode', 'pred_in', 'pred_out', 1);" value="decompose Result" /><br/>
+  <input type="button" onClick="javascript: asyncPost('k', 'mode', 'pred_in', 'pred_out', 1);" value="Konbu Check Sample" /><br/>
   <p id="pred_out"></p></li>
-<li>Feasible region: <input type="button" onClick="javascript: asyncPost('k', 'mode', 'konbu_out', 'konbu_out', 1);" value="Konbu Check Sample" /><br/>
-  <p id="konbu_out"></p></li>
 <li>
 <div>
 <pre>
 <?php
-system("./ls -l *.php *.cgi goki puts konbu p0 p1");
+system("./ls -l *.php *.cgi goki puts konbu p0 p1 catg catgr decompose");
 echo "\n";
 system("./date");
 echo "\n";

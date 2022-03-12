@@ -15,11 +15,11 @@ COPY p0.hh /konbu
 COPY p1.cc /konbu
 COPY p1.hh /konbu
 COPY goki.cc /konbu
-COPY enlarge.hh /konbu
-COPY fileio.hh /konbu
-COPY match.hh /konbu
-COPY redig.hh /konbu
+COPY goki.hh /konbu
+COPY catg.cc /konbu
+COPY catgr.cc /konbu
 COPY catg.hh /konbu
+COPY decompose.cc /konbu
 COPY decompose.hh /konbu
 COPY puts.cc /konbu
 COPY corpus.hh /konbu
@@ -38,16 +38,23 @@ WORKDIR /konbu
 RUN cd /konbu && g++ -Ofast -o konbu konbu.cc
 RUN cd /konbu && g++ -Ofast -o p0 p0.cc
 RUN cd /konbu && g++ -Ofast -o p1 p1.cc
+RUN cd /konbu && g++ -Ofast -o catg catg.cc
+RUN cd /konbu && g++ -Ofast -o catgr catgr.cc
+RUN cd /konbu && g++ -Ofast -o decompose decompose.cc
 RUN cd /konbu && g++ -Ofast -o goki goki.cc
 RUN cd /konbu && g++ -Ofast -o puts puts.cc
 RUN cp /konbu/konbu /var/www/htdocs
 RUN cp /konbu/p0 /var/www/htdocs
 RUN cp /konbu/p1 /var/www/htdocs
+RUN cp /konbu/catg /var/www/htdocs
+RUN cp /konbu/catgr /var/www/htdocs
+RUN cp /konbu/decompose /var/www/htdocs
 RUN cp /konbu/goki /var/www/htdocs
 RUN cp /konbu/puts /var/www/htdocs
 RUN chown -R root:wheel /var/www/htdocs
-RUN chmod 111 /var/www/htdocs/konbu /var/www/htdocs/p0 /var/www/htdocs/p1 /var/www/htdocs/goki /var/www/htdocs/puts
+RUN chmod 111 /var/www/htdocs/konbu /var/www/htdocs/p0 /var/www/htdocs/p1 /var/www/htdocs/catg /var/www/htdocs/catgr /var/www/htdocs/decompose /var/www/htdocs/goki /var/www/htdocs/puts
 RUN chmod 555 /var/www/htdocs/log.cgi
+RUN mkdir -p /var/www/htdocs/.cache/lieonn
 RUN mkdir -p /var/run/fcgiwrap
 RUN chown www-data:www-data /var/run/fcgiwrap `which fcgiwrap`
 RUN chmod ug+s `which fcgiwrap`
