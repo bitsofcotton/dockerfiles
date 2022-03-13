@@ -22,7 +22,7 @@ function doexecp($cmd, $text, $viewout) {
 
 if(isset($_REQUEST["cmd"])) {
   header("Content-Type: text/plain;");
-  switch($_REQUEST["cmd"]) {
+  switch(($_REQUEST["cmd"])[0]) {
   case "p":
     $text = $_REQUEST['containt'];
     echo "<pre>";
@@ -58,16 +58,16 @@ if(isset($_REQUEST["cmd"])) {
     break;
   case "k":
     echo "<pre>";
-    doexecp("./konbu", $text, true);
+    doexecp("./konbu", "\n", true);
     echo "</pre>";
     break;
   case "g":
     // $convert = "/usr/local/bin/convert ";
     $convert = "convert ";
-    $resize  = " -resize 300x300\> ";
-    if($_REQUEST["mode"] == "m" || $_REQUEST["mode"] == "o") {
+    $resize  = " -resize 80x80\> ";
+    if(($_REQUEST["cmd"])[1] == "m" || ($_REQUEST["cmd"])[1] == "o") {
       echo "<textarea id='objfile'>";
-      switch($_REQUEST["mode"]) {
+      switch(($_REQUEST["cmd"])[1]) {
       case "m":
         echo "newmtl material0\n";
         echo "Ka 1.000000 1.000000 1.000000\n";
@@ -80,14 +80,14 @@ if(isset($_REQUEST["cmd"])) {
         $temp = $_FILES['containt']['tmp_name'] . "-work.ppm";
         $tout = tempnam(dirname($_FILES['containt']['tmp_name']), 'obj');
         doexecp($convert . $_FILES['containt']['tmp_name'] . $resize . ' -compress none ' . $temp, '\n', false);
-        doexecp('./goki obj 2 1 .25 0 ' . $temp . ' ' . $tout, '\n', false);
+        doexecp('./goki obj 20 1 ' . $temp . ' ' . $tout, '\n', false);
         echo file_get_contents($tout);
         unlink($temp);
         unlink($tout);
         unlink($tout . '.mtl');
         break;
       default:
-        echo "Not implemented: " . $_REQUEST["mode"];
+        echo "Not implemented: " . $_REQUEST["cmd"];
       }
       echo "</textarea><br/>";
       echo "<a href='#' onClick='javascript: document.getElementById(\"downobj\").href = window.URL.createObjectURL(new Blob([document.getElementById(\"objfile\").value, {type: \"text/plain\"}]));'>Make blob</a><br/>";
@@ -99,7 +99,7 @@ if(isset($_REQUEST["cmd"])) {
       $tout = tempnam(dirname($_FILES['containt']['tmp_name']), 'obj');
       $tpng = $_FILES['containt']['tmp_name'] . "-work.png";
       doexecp($convert . $_FILES['containt']['tmp_name'] . $resize . ' -compress none ' . $temp, '\n', false);
-      switch($_REQUEST["mode"]) {
+      switch(($_REQUEST["cmd"])[1]) {
       case "c":
         doexecp('./goki collect ' . $temp . ' ' . $tout . ' 1 1', '\n', false);
         break;
@@ -113,7 +113,7 @@ if(isset($_REQUEST["cmd"])) {
         doexecp('./goki sharpen ' . $temp . ' ' . $tout . ' 1 1', '\n', false);
         break;
       default:
-        echo "Not implemented: " . $_REQUEST["mode"] . "' />";
+        echo "Not implemented: " . $_REQUEST["cmd"] . "' />";
         unlink($temp);
         exit(0);
         break;
@@ -134,7 +134,7 @@ if(isset($_REQUEST["cmd"])) {
     $ddict1 = $_REQUEST["dict1"];
     $dname  = str_replace($dameji, "", $_REQUEST["dictname"]);
     $mode = "";
-    switch($_REQUEST["mode"]) {
+    switch(($_REQUEST["cmd"])[1]) {
     case "s":
       $mode = "stat";
       break;
@@ -208,7 +208,7 @@ if(isset($_REQUEST["cmd"])) {
       }
       break;
     default:
-      echo "Not implemented: " . $_REQUEST["mode"];
+      echo "Not implemented: " . $_REQUEST["cmd"];
       break;
     }
     unlink($ttopic);
@@ -279,8 +279,6 @@ function asyncPost(cmd, sel, cont, outcont, fin) {
   };
   fd = new FormData();
   fd.append("cmd", cmd);
-  ssel = document.getElementById(sel);
-  fd.append("mode", ssel.options[ssel.selectedIndex].value);
   if(fin == 0) {
     fd.append("containt", document.getElementById(cont).files[0]);
   } else if(fin == 1) {
@@ -306,15 +304,12 @@ function asyncPost(cmd, sel, cont, outcont, fin) {
 Hello, this is konbu.azurewebsites.net the working sample page of the software located in <a href="https://github.com/bitsofcotton">github.com/bitsofcotton</a> . <br/><br/>
 <ul>
 <li>Image file: <input type="file" id="image_in" /><br />
-  <select id="mode">
-    <option value="c">collect</option>
-    <option value="b">bump</option>
-    <option value="p">extend</option>
-    <option value="l">light</option>
-    <option value="o">obj</option>
-    <option value="m">mtl</option>
-  </select><br/>
-  <input type="button" onClick="javascript: asyncPost('g', 'mode', 'image_in', 'image_out', 0);" value="Calculate" /><br/>
+  <input type="button" onClick="javascript: asyncPost('gc', 'mode', 'image_in', 'image_out', 0);" value="collect" />
+  <input type="button" onClick="javascript: asyncPost('gb', 'mode', 'image_in', 'image_out', 0);" value="bump" />
+  <input type="button" onClick="javascript: asyncPost('gp', 'mode', 'image_in', 'image_out', 0);" value="extend" />
+  <input type="button" onClick="javascript: asyncPost('gl', 'mode', 'image_in', 'image_out', 0);" value="light" />
+  <input type="button" onClick="javascript: asyncPost('go', 'mode', 'image_in', 'image_out', 0);" value="obj" />
+  <input type="button" onClick="javascript: asyncPost('gm', 'mode', 'image_in', 'image_out', 0);" value="mtl" /> <br />
   <p id="image_out"></p></li>
 <li>Text file: <br/>
   <textarea id="puts_analyse" maxlength="40000" rows="30" cols="80"></textarea><br/>
@@ -326,30 +321,21 @@ Hello, this is konbu.azurewebsites.net the working sample page of the software l
   <textarea id="puts_d1" maxlength="40000" rows="12" cols="20"></textarea><br/>
   Topic:
   <textarea id="puts_topic" maxlength="40000" rows="12" cols="20"></textarea><br/>
-  <select id="pmode">
-    <option value="s">stat</option>
-    <option value="r">root</option>
-    <option value="b">balance</option>
-    <option value="w">word</option>
-    <option value="d">detail</option>
-    <option value="l">lack</option>
-    <option value="D">diff</option>
-    <option value="S">same</option>
-  </select>
-  <input type="button" onClick="javascript: asyncPost('t', 'pmode', 'puts_analyse', 'puts_out', 2);" value="Analyse" /><br />
+  <input type="button" onClick="javascript: asyncPost('ts', 'pmode', 'puts_analyse', 'puts_out', 2);" value="stat" />
+  <input type="button" onClick="javascript: asyncPost('tr', 'pmode', 'puts_analyse', 'puts_out', 2);" value="root" />
+  <input type="button" onClick="javascript: asyncPost('tb', 'pmode', 'puts_analyse', 'puts_out', 2);" value="balance" />
+  <input type="button" onClick="javascript: asyncPost('tw', 'pmode', 'puts_analyse', 'puts_out', 2);" value="word" />
+  <input type="button" onClick="javascript: asyncPost('td', 'pmode', 'puts_analyse', 'puts_out', 2);" value="detail" />
+  <input type="button" onClick="javascript: asyncPost('tl', 'pmode', 'puts_analyse', 'puts_out', 2);" value="lack" />
+  <input type="button" onClick="javascript: asyncPost('tD', 'pmode', 'puts_analyse', 'puts_out', 2);" value="diff" />
+  <input type="button" onClick="javascript: asyncPost('tS', 'pmode', 'puts_analyse', 'puts_out', 2);" value="same" /><br />
   <p id="puts_out"></p></li>
 <li>Log file:
   <form method="POST" enctype="multipart/form-data" action="log.cgi">
     <label>Preset:
-    <select id="preset" onchange="preset_select(document.getElementById('preset').value);">
-      <option value="null" selected>Null</option>
-      <option value="apache_default_proxy">Apache 1.3</option>
-      <option value="hostapd">syslog (hostapd)</option>
-      <option value="dhclient">syslog (dhclient)</option>
-      <option value="dhcpd">syslog (dhcpd)</option>
-      <option value="pcap_tcpdump_option">pcap (tcpdump -option)</option>
-    </select>
-    </label><br/><br/>
+    <input type="button" onClick="javascript: preset_select('null');" value="Null" />
+    <input type="button" onClick="javascript: preset_select('apache_default_proxy');" value="Apache 1.3" />
+    </label><br/>
     <label>Regex to filter.<br/><input type="text" name="regex" id="regex" size="80"></label><br/>
     <label>Name of each field.<br/><input type="text" name="field" id="field" size="80" placeholder="[a-zA-Z0-9]+, comma separated."></label><br/>
     <label>Type of each field.<br/><input type="text" name="type" id="type" size="80" placeholder="'string' or 'url' or 'path', comma separated."></label><br/>
@@ -362,12 +348,12 @@ Hello, this is konbu.azurewebsites.net the working sample page of the software l
 </li>
 <li>Numerical data (float, \n separated.) : <br/>
   <textarea id="pred_in" maxlength="80000" rows="30" cols="80"></textarea><br/>
-  <input type="button" onClick="javascript: asyncPost('p', 'mode', 'pred_in', 'pred_out', 1);" value="p0 Result" /><br/>
-  <input type="button" onClick="javascript: asyncPost('P', 'mode', 'pred_in', 'pred_out', 1);" value="p1 Result" /><br/>
-  <input type="button" onClick="javascript: asyncPost('c', 'mode', 'pred_in', 'pred_out', 1);" value="catgr Result" /><br/>
-  <input type="button" onClick="javascript: asyncPost('C', 'mode', 'pred_in', 'pred_out', 1);" value="catg  Result" /><br/>
-  <input type="button" onClick="javascript: asyncPost('d', 'mode', 'pred_in', 'pred_out', 1);" value="decompose Result" /><br/>
-  <input type="button" onClick="javascript: asyncPost('k', 'mode', 'pred_in', 'pred_out', 1);" value="Konbu Check Sample" /><br/>
+  <input type="button" onClick="javascript: asyncPost('p', 'mode', 'pred_in', 'pred_out', 1);" value="p0" />
+  <input type="button" onClick="javascript: asyncPost('P', 'mode', 'pred_in', 'pred_out', 1);" value="p1" />
+  <input type="button" onClick="javascript: asyncPost('c', 'mode', 'pred_in', 'pred_out', 1);" value="catgr" />
+  <input type="button" onClick="javascript: asyncPost('C', 'mode', 'pred_in', 'pred_out', 1);" value="catg" />
+  <input type="button" onClick="javascript: asyncPost('d', 'mode', 'pred_in', 'pred_out', 1);" value="decompose" />
+  <input type="button" onClick="javascript: asyncPost('k', 'mode', 'pred_in', 'pred_out', 1);" value="konbu sample" /><br/>
   <p id="pred_out"></p></li>
 <li>
 <div>
