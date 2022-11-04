@@ -35,6 +35,12 @@ if(isset($_REQUEST["cmd"])) {
     doexecp("./p1", $text, true);
     echo "</pre>";
     break;
+  case "q":
+    $text = $_REQUEST['containt'];
+    echo "<pre>";
+    doexecp("./p", $text, true);
+    echo "</pre>";
+    break;
   case "c":
     $text = explode("\n", $_REQUEST['containt']);
     $text = array_slice($text, 0, 2000);
@@ -109,8 +115,14 @@ if(isset($_REQUEST["cmd"])) {
       case "p":
         doexecp('./goki pextend ' . $temp . ' ' . $tout . ' 1 1', '\n', false);
         break;
-      case "l":
+      case "s":
         doexecp('./goki sharpen ' . $temp . ' ' . $tout . ' 1 1', '\n', false);
+        break;
+      case "d":
+        doexecp('./goki diffraw ' . $temp . ' ' . $tout . ' 1 1', '\n', false);
+        break;
+      case "l":
+        doexecp('./goki blink   ' . $temp . ' ' . $tout . ' 1 1', '\n', false);
         break;
       default:
         echo "Not implemented: " . $_REQUEST["cmd"] . "' />";
@@ -307,6 +319,8 @@ Hello, this is konbu.azurewebsites.net the working sample page of the software l
   <input type="button" onClick="javascript: asyncPost('gc', 'mode', 'image_in', 'image_out', 0);" value="collect" />
   <input type="button" onClick="javascript: asyncPost('gb', 'mode', 'image_in', 'image_out', 0);" value="bump" />
   <input type="button" onClick="javascript: asyncPost('gp', 'mode', 'image_in', 'image_out', 0);" value="extend" />
+  <input type="button" onClick="javascript: asyncPost('gs', 'mode', 'image_in', 'image_out', 0);" value="sharpen" />
+  <input type="button" onClick="javascript: asyncPost('gd', 'mode', 'image_in', 'image_out', 0);" value="diffraw" />
   <input type="button" onClick="javascript: asyncPost('gl', 'mode', 'image_in', 'image_out', 0);" value="light" />
   <input type="button" onClick="javascript: asyncPost('go', 'mode', 'image_in', 'image_out', 0);" value="obj" />
   <input type="button" onClick="javascript: asyncPost('gm', 'mode', 'image_in', 'image_out', 0);" value="mtl" /> <br />
@@ -350,6 +364,7 @@ Hello, this is konbu.azurewebsites.net the working sample page of the software l
   <textarea id="pred_in" maxlength="80000" rows="30" cols="80"></textarea><br/>
   <input type="button" onClick="javascript: asyncPost('p', 'mode', 'pred_in', 'pred_out', 1);" value="p0" />
   <input type="button" onClick="javascript: asyncPost('P', 'mode', 'pred_in', 'pred_out', 1);" value="p1" />
+  <input type="button" onClick="javascript: asyncPost('q', 'mode', 'pred_in', 'pred_out', 1);" value="p" />
   <input type="button" onClick="javascript: asyncPost('c', 'mode', 'pred_in', 'pred_out', 1);" value="catgr" />
   <input type="button" onClick="javascript: asyncPost('C', 'mode', 'pred_in', 'pred_out', 1);" value="catg" />
   <input type="button" onClick="javascript: asyncPost('d', 'mode', 'pred_in', 'pred_out', 1);" value="decompose" />
@@ -359,7 +374,7 @@ Hello, this is konbu.azurewebsites.net the working sample page of the software l
 <div>
 <pre>
 <?php
-system("./ls -l *.php *.cgi goki puts konbu p0 p1 catg catgr decompose");
+system("./ls -l *.php *.cgi goki puts konbu p0 p1 p catg catgr decompose");
 echo "\n";
 system("./date");
 echo "\n";
